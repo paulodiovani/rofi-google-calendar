@@ -128,6 +128,27 @@ def end_date():
     return date.isoformat()
 
 
+def format_event_line(event):
+    config = settings()
+    tz_info = timezone(config["timezone"])
+
+    event_start = datetime.fromisoformat(event["start"]["dateTime"])
+    event_end = datetime.fromisoformat(event["end"]["dateTime"])
+    event_summary = event["summary"]
+    # event_description = event['description']
+
+    now = datetime.now(tz_info).replace(
+        hour=23, minute=59, second=59, microsecond=999999
+    )
+    difference = now - event_start
+    if difference.days == 0:
+        return f"Today      {event_start.strftime('%H:%M')} - {event_end.strftime('%H:%M')} {event_summary}"
+    elif difference.days == -1:
+        return f"Tomorrow   {event_start.strftime('%H:%M')} - {event_end.strftime('%H:%M')} {event_summary}"
+    else:
+        return f"{event_start.strftime('%Y-%m-%d %H:%M')} - {event_end.strftime('%H:%M')} {event_summary}"
+
+
 @click.command()
 @click.option(
     "-s",
@@ -158,6 +179,8 @@ def main(
     # initializer calendar service
     service = build("calendar", "v3", credentials=credentials())
 
+    all_events = []
+
     for calendar_id in config["calendar_id"]:
         events = fetch_events(service, calendar_id)
 
@@ -166,7 +189,10 @@ def main(
             continue
 
         for event in events:
-            print(event.get("summary", ""))
+            all_events.append(event)
+
+    for ev in all_events:
+        print(format_event_line(ev))
 
 
 if __name__ == "__main__":
