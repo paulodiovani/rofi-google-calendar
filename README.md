@@ -8,14 +8,14 @@ A [rofi] script to show events from Google Calendar and open details or events.
     - Enable the API (select or create a project)
     - Configure the OAuth consent screen
     - Authorize credentials for a desktop application
-2. Save the client secret file to `store/credentials.json`
+2. Save the client secret file to `~/.config/rofi-calendar/credentials.json`
 3. Ask to "See all events details" on the calendars to read (listed in `settings.yml`)
 
 ## Setup and usage
 
 ```bash
 # Copy and fill settings file
-cp rofi-calendar.yml.sample ~/.config/rofi/rofi-calendar.yml
+cp settings.yml.sample ~/.config/rofi-calendar/settings.yml
 
 # Create and activate virtual env
 python -m venv .venv

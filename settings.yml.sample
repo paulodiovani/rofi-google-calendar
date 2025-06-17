@@ -1,9 +1,13 @@
 # vi: set ft=yaml
 # rofi-calendar settings
-# Copy this file to `~/.config/rofi/rofi-calendar.yml` and update as you need
+# Copy this file to `~/.config/rofi-calendar/settings.yml` and update as you need
 ---
 settings:
   # List of calendar ids to read from. You must have access to these calendars.
   # Can also be e-mail addresses.
   calendar_id:
     - primary
+
+  # Timezone used for events
+  # e.g. America/Sao_Paulo, America/Los_Angeles, ...
+  timezone: UTC
