@@ -2,6 +2,8 @@
 
 A [rofi] script to show events from Google Calendar and open details or events.
 
+Loosely based on https://www.reddit.com/r/unixporn/comments/oin3qg/oc_timetablecalendar_setup_with_rofi/.
+
 ## Preliminary setup
 
 1. Follow Instructions from the [Python quickstart page]
