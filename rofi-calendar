@@ -191,6 +191,12 @@ def main(
         for event in events:
             all_events.append(event)
 
+    all_events.sort(
+        key=lambda ev: ev["start"]["dateTime"]
+        if "dateTime" in ev["start"]
+        else ev["start"]["date"]
+    )
+
     for ev in all_events:
         print(format_event_line(ev))
 
