@@ -157,6 +157,9 @@ def format_event_line(event):
 
     event_summary = event["summary"]
     # event_description = event['description'].replace("\n", " ")
+    event_conference = (
+        event["conferenceData"]["conferenceId"] if "conferenceData" in event else ""
+    )
 
     now = datetime.now(tz_info).replace(
         hour=23, minute=59, second=59, microsecond=999999
@@ -176,7 +179,13 @@ def format_event_line(event):
         else f"{event_start.strftime('%H:%M')} - {event_end.strftime('%H:%M')}"
     )
 
-    return "{:<12} {:16} {:<30}".format(day, event_time, event_summary)
+    return "{:<12} {:16} {}{:46.46} {:<12}".format(
+        day,
+        event_time,
+        "📹 " if event_conference else "",
+        event_summary,
+        event_conference,
+    )
 
 
 @click.command()
