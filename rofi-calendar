@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 import os.path
-from datetime import datetime
+import webbrowser
+from datetime import datetime, time, timedelta
 from functools import lru_cache
+from re import search
 
 import click
 import yaml
@@ -128,25 +130,68 @@ def end_date():
     return date.isoformat()
 
 
+def default_start_date():
+    return datetime.now().isoformat()
+
+
+def default_end_date():
+    end_date = datetime.now() + timedelta(days=1)
+    end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+    return end_date.isoformat()
+
+
 def format_event_line(event):
     config = settings()
     tz_info = timezone(config["timezone"])
 
-    event_start = datetime.fromisoformat(event["start"]["dateTime"])
-    event_end = datetime.fromisoformat(event["end"]["dateTime"])
+    event_start = event["start"]
+    event_end = event["end"]
+
+    (event_start, event_end) = (
+        # date and time events
+        (
+            datetime.fromisoformat(event_start["dateTime"]),
+            datetime.fromisoformat(event_end["dateTime"]),
+        )
+        if "dateTime" in event_start and "dateTime" in event_end
+        # full day events
+        else (
+            datetime.fromisoformat(event_start["date"]).replace(tzinfo=tz_info),
+            datetime.fromisoformat(event_end["date"]).replace(tzinfo=tz_info),
+        )
+    )
+
     event_summary = event["summary"]
-    # event_description = event['description']
+    # event_description = event['description'].replace("\n", " ")
+    event_conference = (
+        event["conferenceData"]["conferenceId"] if "conferenceData" in event else ""
+    )
 
     now = datetime.now(tz_info).replace(
         hour=23, minute=59, second=59, microsecond=999999
     )
     difference = now - event_start
-    if difference.days == 0:
-        return f"Today      {event_start.strftime('%H:%M')} - {event_end.strftime('%H:%M')} {event_summary}"
-    elif difference.days == -1:
-        return f"Tomorrow   {event_start.strftime('%H:%M')} - {event_end.strftime('%H:%M')} {event_summary}"
-    else:
-        return f"{event_start.strftime('%Y-%m-%d %H:%M')} - {event_end.strftime('%H:%M')} {event_summary}"
+    day = (
+        "Today"
+        if difference.days == 0
+        else "Tomorrow"
+        if difference.days == -1
+        else event_start.strftime("%Y-%m-%d")
+    )
+
+    event_time = (
+        "All day"
+        if event_start.time() == time(0, 0) and event_end.time() == time(0, 0)
+        else f"{event_start.strftime('%H:%M')} - {event_end.strftime('%H:%M')}"
+    )
+
+    return "{:<12} {:16} {}{:46.46} {:<12}".format(
+        day,
+        event_time,
+        "📹 " if event_conference else "",
+        event_summary,
+        event_conference,
+    )
 
 
 @click.command()
@@ -155,25 +200,31 @@ def format_event_line(event):
     "--start",
     "--start-date",
     help="Start date to fetch events from (default to now).",
-    default=datetime.now().isoformat(),
+    default=default_start_date(),
 )
 @click.option(
     "-e",
     "--end",
     "--end-date",
     help="End date to fetch events until (default to end of today).",
-    default=datetime.now()
-    .replace(hour=23, minute=59, second=59, microsecond=999999)
-    .isoformat(),
+    default=default_end_date(),
 )
-def main(
-    start: str,
-    end: str,
-):
+@click.argument("selection", required=False)
+def main(start: str, end: str, selection: str | None = None):
     """
     Fetch calendar events and print in a format suitable for rofi.
     Used as: rofi -show cal -modes cal:rofi-calendar
+
+    Or accepts a rofi selection to take an action.
     """
+    if selection is not None:
+        matches = search(".*(\\w{3}-\\w{4}-\\w{3})$", selection)
+        if matches is not None:
+            conference_id = matches.group(1)
+            conference_url = f"https://meet.google.com/{conference_id}"
+            webbrowser.open(conference_url, new=0, autoraise=True)
+        return
+
     # initialize config with overrides, if any
     config = settings(**{"start_date": start, "end_date": end})
     # initializer calendar service
