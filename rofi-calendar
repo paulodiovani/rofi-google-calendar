@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os.path
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from functools import lru_cache
 
 import click
@@ -138,21 +138,45 @@ def format_event_line(event):
     config = settings()
     tz_info = timezone(config["timezone"])
 
-    event_start = datetime.fromisoformat(event["start"]["dateTime"])
-    event_end = datetime.fromisoformat(event["end"]["dateTime"])
+    event_start = event["start"]
+    event_end = event["end"]
+
+    (event_start, event_end) = (
+        # date and time events
+        (
+            datetime.fromisoformat(event_start["dateTime"]),
+            datetime.fromisoformat(event_end["dateTime"]),
+        )
+        if "dateTime" in event_start and "dateTime" in event_end
+        # full day events
+        else (
+            datetime.fromisoformat(event_start["date"]).replace(tzinfo=tz_info),
+            datetime.fromisoformat(event_end["date"]).replace(tzinfo=tz_info),
+        )
+    )
+
     event_summary = event["summary"]
-    # event_description = event['description']
+    # event_description = event['description'].replace("\n", " ")
 
     now = datetime.now(tz_info).replace(
         hour=23, minute=59, second=59, microsecond=999999
     )
     difference = now - event_start
-    if difference.days == 0:
-        return f"Today      {event_start.strftime('%H:%M')} - {event_end.strftime('%H:%M')} {event_summary}"
-    elif difference.days == -1:
-        return f"Tomorrow   {event_start.strftime('%H:%M')} - {event_end.strftime('%H:%M')} {event_summary}"
-    else:
-        return f"{event_start.strftime('%Y-%m-%d %H:%M')} - {event_end.strftime('%H:%M')} {event_summary}"
+    day = (
+        "Today"
+        if difference.days == 0
+        else "Tomorrow"
+        if difference.days == -1
+        else event_start.strftime("%Y-%m-%d")
+    )
+
+    event_time = (
+        "All day"
+        if event_start.time() == time(0, 0) and event_end.time() == time(0, 0)
+        else f"{event_start.strftime('%H:%M')} - {event_end.strftime('%H:%M')}"
+    )
+
+    return "{:<12} {:16} {:<30}".format(day, event_time, event_summary)
 
 
 @click.command()
