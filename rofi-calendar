@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 import os.path
+import webbrowser
 from datetime import datetime, time, timedelta
 from functools import lru_cache
+from re import search
 
 import click
 import yaml
@@ -128,6 +130,10 @@ def end_date():
     return date.isoformat()
 
 
+def default_start_date():
+    return datetime.now().isoformat()
+
+
 def default_end_date():
     end_date = datetime.now() + timedelta(days=1)
     end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
@@ -194,7 +200,7 @@ def format_event_line(event):
     "--start",
     "--start-date",
     help="Start date to fetch events from (default to now).",
-    default=datetime.now().isoformat(),
+    default=default_start_date(),
 )
 @click.option(
     "-e",
@@ -203,14 +209,22 @@ def format_event_line(event):
     help="End date to fetch events until (default to end of today).",
     default=default_end_date(),
 )
-def main(
-    start: str,
-    end: str,
-):
+@click.argument("selection", required=False)
+def main(start: str, end: str, selection: str | None = None):
     """
     Fetch calendar events and print in a format suitable for rofi.
     Used as: rofi -show cal -modes cal:rofi-calendar
+
+    Or accepts a rofi selection to take an action.
     """
+    if selection is not None:
+        matches = search(".*(\\w{3}-\\w{4}-\\w{3})$", selection)
+        if matches is not None:
+            conference_id = matches.group(1)
+            conference_url = f"https://meet.google.com/{conference_id}"
+            webbrowser.open(conference_url, new=0, autoraise=True)
+        return
+
     # initialize config with overrides, if any
     config = settings(**{"start_date": start, "end_date": end})
     # initializer calendar service
