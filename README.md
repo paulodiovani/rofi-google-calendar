@@ -32,5 +32,15 @@ pip install -r requirements.txt
 rofi -show cal -modes "cal:rofi-calendar"
 ```
 
+## Features
+
+Existing and planned features.
+
+- [ ] Package and Install as a Rofi plugin
+- [x] Read events from Google Calendar
+- [x] Open Meet conferences on default browser
+- [ ] Open Zoom conferences on default browser or Zoom app
+- [ ] Support multiple Google/Calendar Accounts
+
 [Python quickstart page]: https://developers.google.com/calendar/api/quickstart/python
 [rofi]: https://github.com/davatorium/rofi
