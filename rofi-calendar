@@ -206,7 +206,7 @@ def format_event_line(event):
     "-e",
     "--end",
     "--end-date",
-    help="End date to fetch events until (default to end of today).",
+    help="End date to fetch events until (default to end of tomorrow).",
     default=default_end_date(),
 )
 @click.argument("selection", required=False)
