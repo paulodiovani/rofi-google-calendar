@@ -12,7 +12,7 @@ Loosely based on https://www.reddit.com/r/unixporn/comments/oin3qg/oc_timetablec
     - Enable the API (select or create a project)
     - Configure the OAuth consent screen
     - Authorize credentials for a desktop application
-2. Save the client secret file to `~/.config/rofi-calendar/credentials.json`
+2. Save the client secret file to `./data/credentials.json`
 
 ## Setup and install
 

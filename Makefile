@@ -17,7 +17,7 @@ dependencies: .venv requirements.txt
 dist: .venv dependencies src
 	. .venv/bin/activate
 	pip install pyinstaller
-	pyinstaller --onefile --name=rofi-calendar src/rofi_calendar.py
+	pyinstaller --add-data "data/credentials.json:data" --onefile --name=rofi-calendar src/rofi_calendar.py
 	pip uninstall -y pyinstaller
 
 install:

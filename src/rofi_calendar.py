@@ -1,4 +1,5 @@
 import os.path
+import sys
 import webbrowser
 from datetime import datetime, time, timedelta
 from functools import lru_cache
@@ -16,12 +17,15 @@ from pytz import timezone
 
 # constants
 CONFIG_PATH = f"{os.environ['HOME']}/.config/rofi-calendar"
-CREDENTIALS_FILE = f"{CONFIG_PATH}/credentials.json"
+
+CREDENTIALS_FILE = f"{getattr(sys, '_MEIPASS', os.getcwd())}/data/credentials.json"
+
 SETTINGS_FILE = f"{CONFIG_PATH}/settings.yml"
 TOKEN_FILE = f"{CONFIG_PATH}/token.json"
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+
 
 
 @cached(cache={}, key=lambda **_: hashkey(None))
