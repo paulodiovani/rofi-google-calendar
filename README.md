@@ -16,6 +16,8 @@ Loosely based on https://www.reddit.com/r/unixporn/comments/oin3qg/oc_timetablec
 
 ## Setup and install
 
+To install on your home folder, set `PREFIX` to `"$HOME/.local"`.
+
 ```bash
 make
 make install PREFIX="$HOME/.local"
