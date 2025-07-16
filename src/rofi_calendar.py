@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os.path
 import webbrowser
 from datetime import datetime, time, timedelta
@@ -217,7 +215,7 @@ def main(start: str, end: str, selection: str | None = None):
 
     Or accepts a rofi selection to take an action.
     """
-    if selection is not None:
+    if selection is not None and selection != "":
         matches = search(".*(\\w{3}-\\w{4}-\\w{3})$", selection)
         if matches is not None:
             conference_id = matches.group(1)

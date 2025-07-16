@@ -29,7 +29,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Run the script with rofi
-rofi -show cal -modes "cal:rofi-calendar"
+rofi -show cal -modes "cal:bin/rofi-calendar"
 ```
 
 ## Features
