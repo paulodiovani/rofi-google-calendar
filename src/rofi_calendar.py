@@ -1,6 +1,5 @@
-#!/usr/bin/env python
-
 import os.path
+import sys
 import webbrowser
 from datetime import datetime, time, timedelta
 from functools import lru_cache
@@ -18,12 +17,15 @@ from pytz import timezone
 
 # constants
 CONFIG_PATH = f"{os.environ['HOME']}/.config/rofi-calendar"
-CREDENTIALS_FILE = f"{CONFIG_PATH}/credentials.json"
+
+CREDENTIALS_FILE = f"{getattr(sys, '_MEIPASS', os.getcwd())}/data/credentials.json"
+
 SETTINGS_FILE = f"{CONFIG_PATH}/settings.yml"
 TOKEN_FILE = f"{CONFIG_PATH}/token.json"
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+
 
 
 @cached(cache={}, key=lambda **_: hashkey(None))
@@ -217,7 +219,7 @@ def main(start: str, end: str, selection: str | None = None):
 
     Or accepts a rofi selection to take an action.
     """
-    if selection is not None:
+    if selection is not None and selection != "":
         matches = search(".*(\\w{3}-\\w{4}-\\w{3})$", selection)
         if matches is not None:
             conference_id = matches.group(1)
