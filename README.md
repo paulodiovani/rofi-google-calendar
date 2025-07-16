@@ -13,14 +13,32 @@ Loosely based on https://www.reddit.com/r/unixporn/comments/oin3qg/oc_timetablec
     - Configure the OAuth consent screen
     - Authorize credentials for a desktop application
 2. Save the client secret file to `~/.config/rofi-calendar/credentials.json`
-3. Ask to "See all events details" on the calendars to read (listed in `settings.yml`)
 
-## Setup and usage
+## Setup and install
+
+```bash
+make
+make install PREFIX="$HOME/.local"
+```
+
+## Configuration
 
 ```bash
 # Copy and fill settings file
 cp settings.yml.sample ~/.config/rofi-calendar/settings.yml
+```
 
+## Usage
+
+```bash
+rofi -show cal -modes "cal:rofi-calendar"
+```
+
+## Development
+
+### Setup and usage
+
+```bash
 # Create and activate virtual env
 python -m venv .venv
 source .venv/bin/activate
@@ -36,7 +54,8 @@ rofi -show cal -modes "cal:bin/rofi-calendar"
 
 Existing and planned features.
 
-- [ ] Package and Install as a Rofi plugin
+- [x] Package and Install as a Rofi plugin
+- [ ] Show "loading..." while fetching calendars
 - [x] Read events from Google Calendar
 - [x] Open Meet conferences on default browser
 - [ ] Open Zoom conferences on default browser or Zoom app
