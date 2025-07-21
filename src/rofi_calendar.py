@@ -27,7 +27,6 @@ TOKEN_FILE = f"{CONFIG_PATH}/token.json"
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
 
-
 @cached(cache={}, key=lambda **_: hashkey(None))
 def settings(**overrides):
     """
@@ -105,11 +104,11 @@ def start_date():
     """
     config = settings()
 
-    tz_info = timezone(config["timezone"])
+    tzinfo = tz_info()
     date = (
-        tz_info.localize(datetime.fromisoformat(config["start_date"]))
+        tzinfo.localize(datetime.fromisoformat(config["start_date"]))
         if config.get("start_date", None)
-        else datetime.now(tz_info)
+        else datetime.now(tzinfo)
     )
 
     return date.isoformat()
@@ -122,11 +121,11 @@ def end_date():
     """
     config = settings()
 
-    tz_info = timezone(config["timezone"])
+    tzinfo = tz_info()
     date = (
-        tz_info.localize(datetime.fromisoformat(config["end_date"]))
+        tzinfo.localize(datetime.fromisoformat(config["end_date"]))
         if config.get("end_date", None)
-        else datetime.now(tz_info)
+        else datetime.now(tzinfo)
     )
 
     return date.isoformat()
@@ -142,9 +141,15 @@ def default_end_date():
     return end_date.isoformat()
 
 
+@lru_cache(maxsize=None)
+def tz_info():
+    config = settings()
+    return timezone(config["timezone"])
+
+
 def format_event_line(event):
     config = settings()
-    tz_info = timezone(config["timezone"])
+    tzinfo = tz_info()
 
     event_start = event["start"]
     event_end = event["end"]
@@ -152,14 +157,14 @@ def format_event_line(event):
     (event_start, event_end) = (
         # date and time events
         (
-            datetime.fromisoformat(event_start["dateTime"]).astimezone(tz_info),
-            datetime.fromisoformat(event_end["dateTime"]).astimezone(tz_info),
+            datetime.fromisoformat(event_start["dateTime"]).astimezone(tzinfo),
+            datetime.fromisoformat(event_end["dateTime"]).astimezone(tzinfo),
         )
         if "dateTime" in event_start and "dateTime" in event_end
         # full day events
         else (
-            datetime.fromisoformat(event_start["date"]).replace(tzinfo=tz_info),
-            datetime.fromisoformat(event_end["date"]).replace(tzinfo=tz_info),
+            datetime.fromisoformat(event_start["date"]).replace(tzinfo=tzinfo),
+            datetime.fromisoformat(event_end["date"]).replace(tzinfo=tzinfo),
         )
     )
 
@@ -169,7 +174,7 @@ def format_event_line(event):
         event["conferenceData"]["conferenceId"] if "conferenceData" in event else ""
     )
 
-    now = datetime.now(tz_info).replace(
+    now = datetime.now(tzinfo).replace(
         hour=23, minute=59, second=59, microsecond=999999
     )
     difference = now - event_start
@@ -229,7 +234,7 @@ def main(start: str, end: str, selection: str | None = None):
 
     # initialize config with overrides, if any
     config = settings(**{"start_date": start, "end_date": end})
-    tz_info = timezone(config["timezone"])
+    tzinfo = tz_info()
     # initializer calendar service
     service = build("calendar", "v3", credentials=credentials())
 
@@ -246,9 +251,11 @@ def main(start: str, end: str, selection: str | None = None):
             all_events.append(event)
 
     all_events.sort(
-        key=lambda ev: datetime.fromisoformat(ev["start"]["dateTime"]).astimezone(tz_info)
+        key=lambda ev: datetime.fromisoformat(ev["start"]["dateTime"]).astimezone(
+            tzinfo
+        )
         if "dateTime" in ev["start"]
-        else datetime.fromisoformat(ev["start"]["date"]).replace(tzinfo=tz_info)
+        else datetime.fromisoformat(ev["start"]["date"]).replace(tzinfo=tzinfo)
     )
 
     for ev in all_events:
