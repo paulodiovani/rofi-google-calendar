@@ -229,6 +229,7 @@ def main(start: str, end: str, selection: str | None = None):
 
     # initialize config with overrides, if any
     config = settings(**{"start_date": start, "end_date": end})
+    tz_info = timezone(config["timezone"])
     # initializer calendar service
     service = build("calendar", "v3", credentials=credentials())
 
@@ -245,9 +246,9 @@ def main(start: str, end: str, selection: str | None = None):
             all_events.append(event)
 
     all_events.sort(
-        key=lambda ev: ev["start"]["dateTime"]
+        key=lambda ev: datetime.fromisoformat(ev["start"]["dateTime"]).astimezone(tz_info)
         if "dateTime" in ev["start"]
-        else ev["start"]["date"]
+        else datetime.fromisoformat(ev["start"]["date"]).replace(tzinfo=tz_info)
     )
 
     for ev in all_events:
