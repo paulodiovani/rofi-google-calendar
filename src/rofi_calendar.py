@@ -152,8 +152,8 @@ def format_event_line(event):
     (event_start, event_end) = (
         # date and time events
         (
-            datetime.fromisoformat(event_start["dateTime"]),
-            datetime.fromisoformat(event_end["dateTime"]),
+            datetime.fromisoformat(event_start["dateTime"]).astimezone(tz_info),
+            datetime.fromisoformat(event_end["dateTime"]).astimezone(tz_info),
         )
         if "dateTime" in event_start and "dateTime" in event_end
         # full day events
