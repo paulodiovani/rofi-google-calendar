@@ -58,6 +58,7 @@ Existing and planned features.
 
 - [x] Package and Install as a Rofi plugin
 - [ ] Show "loading..." while fetching calendars
+- [ ] Cache results, show cache first if exists
 - [x] Read events from Google Calendar
 - [x] Open Meet conferences on default browser
 - [ ] Open Zoom conferences on default browser or Zoom app
